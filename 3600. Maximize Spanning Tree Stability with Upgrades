@@ -1,0 +1,86 @@
+import java.util.*;
+
+class Solution {
+
+    class DSU {
+        int[] parent;
+
+        DSU(int n) {
+            parent = new int[n];
+            for(int i = 0; i < n; i++) parent[i] = i;
+        }
+
+        int find(int x) {
+            if(parent[x] != x)
+                parent[x] = find(parent[x]);
+            return parent[x];
+        }
+
+        boolean union(int a, int b) {
+            int pa = find(a), pb = find(b);
+            if(pa == pb) return false;
+            parent[pa] = pb;
+            return true;
+        }
+    }
+
+    public int maxStability(int n, int[][] edges, int k) {
+
+        int low = 1, high = 200000; // max possible after upgrade
+        int ans = -1;
+
+        while(low <= high) {
+            int mid = (low + high) / 2;
+
+            if(can(n, edges, k, mid)) {
+                ans = mid;
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
+
+        return ans;
+    }
+
+    private boolean can(int n, int[][] edges, int k, int mid) {
+
+        DSU dsu = new DSU(n);
+        int upgrades = 0;
+
+        // Step 1: handle MUST edges
+        for(int[] e : edges) {
+            int u = e[0], v = e[1], s = e[2], must = e[3];
+
+            if(must == 1) {
+                if(s < mid) return false;
+                dsu.union(u, v);
+            }
+        }
+
+        // Step 2: handle optional edges
+        for(int[] e : edges) {
+            int u = e[0], v = e[1], s = e[2], must = e[3];
+
+            if(must == 0) {
+                if(dsu.find(u) == dsu.find(v)) continue;
+
+                if(s >= mid) {
+                    dsu.union(u, v);
+                }
+                else if(s * 2 >= mid && upgrades < k) {
+                    upgrades++;
+                    dsu.union(u, v);
+                }
+            }
+        }
+
+        // Step 3: check connectivity
+        int root = dsu.find(0);
+        for(int i = 1; i < n; i++) {
+            if(dsu.find(i) != root) return false;
+        }
+
+        return true;
+    }
+}
