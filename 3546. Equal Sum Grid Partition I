@@ -1,0 +1,60 @@
+class Solution {
+    long rowarr[] , colmarr[];
+    public boolean canPartitionGrid(int[][] grid) {
+        int m = grid.length, n = grid[0].length;
+        rowarr = new long[m];
+        colmarr = new long[n];
+
+        long sum = getSum(grid);
+
+        long curr = 0;
+        for(int i =0;i<m-1;i++)
+        {
+            curr+=rowarr[i];
+            if(curr==sum-curr)
+            {
+                return true;
+            }    
+        }
+        long curr1= 0;
+        for(int j =0 ;j<n-1;j++)
+        {
+             curr1+=colmarr[j];
+            if(curr1==sum-curr1)
+            {
+                return true;
+            }
+            
+            
+        }
+    
+        return false;
+        
+    }
+    long getSum(int[][] grid)
+     {
+        long sum=0;
+        for(int i =0 ;i<grid.length;i++)
+        {
+            long rowsum=0;
+            for(int j =0 ;j<grid[0].length;j++)
+            {
+                sum+=grid[i][j];
+                rowsum += grid[i][j];
+            }
+            rowarr[i]=rowsum;
+
+        }
+        for(int j =0 ;j<grid[0].length;j++)
+        {
+            long colsum=0;
+            for(int  i =0; i<grid.length;i++)
+            {
+                colsum+=grid[i][j];
+            }
+            colmarr[j]=colsum;
+        }
+        return sum;
+     
+}
+}
