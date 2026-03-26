@@ -1,0 +1,99 @@
+class Solution {
+
+    int m, n;
+    long totalsum;
+    int[][] grid;
+    HashMap<Long, List<int[]>> hmap;
+
+    public boolean canPartitionGrid(int[][] grid) {
+        this.grid = grid;
+        m = grid.length;
+        n = grid[0].length;
+        hmap = new HashMap<>();
+
+        // build map + total sum
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                totalsum += grid[i][j];
+                long val = grid[i][j];
+                hmap.computeIfAbsent(val, k -> new ArrayList<>()).add(new int[]{i, j});
+            }
+        }
+
+        // horizontal cut
+        long curr = 0;
+        for (int i = 0; i < m - 1; i++) {
+            for (int j = 0; j < n; j++) {
+                curr += grid[i][j];
+            }
+            if (isValid(curr, totalsum - curr, i, true)) {
+                return true;
+            }
+        }
+
+        // vertical cut
+        curr = 0;
+        for (int j = 0; j < n - 1; j++) {
+            for (int i = 0; i < m; i++) {
+                curr += grid[i][j];
+            }
+            if (isValid(curr, totalsum - curr, j, false)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    boolean isValid(long a, long b, int index, boolean rowcut) {
+
+        if (a == b) return true;
+
+        long diff = Math.abs(a - b);
+
+        if (!hmap.containsKey(diff)) return false;
+
+        List<int[]> indices = hmap.get(diff);
+
+        for (int[] idx : indices) {
+            int r = idx[0], c = idx[1];
+
+            boolean inA = rowcut ? r <= index : c <= index;
+
+            // decide from which section to remove
+            if (a > b && !inA) continue;
+            if (b > a && inA) continue;
+
+            int minR, maxR, minC, maxC;
+
+            if (inA) {
+                minR = 0;
+                minC = 0;
+                maxR = rowcut ? index : m - 1;
+                maxC = rowcut ? n - 1 : index;
+            } else {
+                maxR = m - 1;
+                maxC = n - 1;
+                minR = rowcut ? index + 1 : 0;
+                minC = rowcut ? 0 : index + 1;
+            }
+
+            int rows = maxR - minR + 1;
+            int cols = maxC - minC + 1;
+
+            boolean canRemove;
+
+            if (rows == 1) {
+                canRemove = (c == minC || c == maxC);
+            } else if (cols == 1) {
+                canRemove = (r == minR || r == maxR);
+            } else {
+                canRemove = true;
+            }
+
+            if (canRemove) return true;
+        }
+
+        return false;
+    }
+}
